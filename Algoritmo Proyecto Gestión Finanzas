@@ -1,0 +1,23 @@
+Inicio
+    Crear lista vacía de movimientos
+    Mostrar menú con opciones:
+        1. Agregar ingreso
+        2. Agregar gasto
+        3. Ver balance
+        4. Guardar en archivo .txt
+        5. Salir
+    Mientras el usuario no elija salir:
+        Si opción es agregar ingreso:
+            Pedir monto y descripción
+            Guardar en la lista como ingreso
+        Si opción es agregar gasto:
+            Pedir monto y descripción
+            Guardar en la lista como gasto
+        Si opción es ver balance:
+            Calcular suma de ingresos - suma de gastos
+            Mostrar resultado
+        Si opción es guardar en archivo:
+            Abrir archivo .txt
+            Escribir todos los movimientos y balance
+        Regresar al menú
+Fin
