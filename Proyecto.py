@@ -37,7 +37,7 @@ def clear_screen():
 def register_income():
   try:
 
-    inc_amount = int(input("Register the amount: "))
+    inc_amount = float(input("Register the amount: "))
 
     inc_description = input("Register a description: ")
 
@@ -58,7 +58,7 @@ def register_income():
       history[inc_year][inc_month] = []
     
     # Once the program validated the inputs and added new years/months
-    # the movement is created and added to "history"
+    # if its the case, the movement is created and added to "history"
   
     movement = {"type": "Income", "amount": inc_amount, "description": inc_description}
 
@@ -70,11 +70,121 @@ def register_income():
     print("Insert valid data")
     return
   
+  
 def register_expense():
+  try:
+    exp_amount = float(input("Register the amount: "))
+
+    exp_category = int(input(
+      "Select a category:\n"
+      "1---Housing\n"
+      "2---Groceries\n"
+      "3---Transportation\n"
+      "4---Health\n"
+      "5---Education\n"
+      "6---Entertainment\n"
+      "7---Clothing and accessories\n"
+      "8---Savings/Investment\n"
+      "9---Others\n"
+      ))
+    
+    if 0 >= exp_category or exp_category > 9:
+      print("Select a valid category")
+      return
+    
+    exp_description = input("Register a description (optional): ")
+
+    exp_year = int(input("Register a year: "))
+    if 2000 > exp_year or exp_year > 2100:
+      print("Please select a valid year")
+      return
+    
+    if exp_year not in history:
+      history[exp_year]= {}
+
+    exp_month = int(input("Register Month (1-12): "))
+    if 0 >= exp_month  or exp_month> 12:
+      print("Please select a valid month")
+      return
+    
+    if exp_month not in history[exp_year]:
+      history[exp_year][exp_month] = []
+    
+    # Once the program validated the inputs and added new years/months
+    # if its the case, the movement is created and added to "history"
+
+    movement = {"type": "Expense", "amount": exp_amount, "category": exp_category, "description": exp_description}
+
+    history[exp_year][exp_month].append(movement)
+
+    print("\nYour movement has been added succesfully\n")
+
+  except ValueError:
+    print("Insert valid data")
+    return
+
+
+def show_balance():
+  try:
+    option = input(
+      "Select a option:\n"
+      "1---General balance\n"
+      "2---Balance per year\n"
+      "3---Balance per month\n"
+                   )
+    if option == "1":
+      print("hola")
+    
+    elif option == "2":
+      sum_inc = 0
+      sum_exp = 0
+      year_selection = int(input("Provide the year, please: "))
+      if year_selection not in history:
+        print(f"No movements registered in {year_selection}")
+      else:
+        for month in history[year_selection]:   
+          for movement in history[year_selection][month]:
+            if "Expense" not in history[year_selection][month][movement]:
+             sum_inc += history[year_selection][month][movement]["Income"]
+            else:
+              sum_exp += history[year_selection][month][movement]["Expense"]
+      balance = sum_inc - sum_exp
+      print(f"In {year_selection}, your balance was/is of {balance}\n")
+      print(f"Total of income: {sum_inc} / Total Expenses: {sum_exp}")
+    
+    elif option == "3":
+      print("hola")
+    
+    else:
+      print("Select a valid option")
+      return
+    
+  except ValueError:
+    print("Insert valid data")
+    return
+
+def view_statistics():
+  print(history)
+
+
+
   
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+  
 
 """
 ========  Menu of the program ========================================
