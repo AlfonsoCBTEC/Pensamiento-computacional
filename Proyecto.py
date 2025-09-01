@@ -22,8 +22,7 @@ import msvcrt #Allows me to enter any button to continue
 """
 print("Welcome to Alfonso's Finance Manager\n")
 
-history = {
-}
+history = {2025: {1: [{'type': 'Income', 'amount': 1000.0, 'description': 'rent'}], 7: [{'type': 'Income', 'amount': 3000.0, 'description': 'salary'}], 3: [{'type': 'Expense', 'amount': 500.0, 'category': 1, 'description': ''}], 4: [{'type': 'Expense', 'amount': 100.0, 'category': 4, 'description': ''}]}, 2026: {5: [{'type': 'Income', 'amount': 5000.0, 'description': 'rent'}], 3: [{'type': 'Expense', 'amount': 3000.0, 'category': 2, 'description': ''}]}}
 
 
 """
@@ -124,7 +123,10 @@ def register_expense():
     return
 
 
-def show_balance():
+def show_balance():  #it works now, but maybe i can make a function to reduce lines of code
+  sum_inc = 0
+  sum_exp = 0
+  
   try:
     option = input(
       "Select a option:\n"
@@ -132,28 +134,59 @@ def show_balance():
       "2---Balance per year\n"
       "3---Balance per month\n"
                    )
+    
     if option == "1":
-      print("hola")
+  
+      if not history:
+        print("No movements registered in your history")
+        return
+      else:
+        for year in history:
+          for month in history[year]:
+            for movement in history[year][month]:
+              if movement["type"] == "Income":
+                sum_inc += movement["amount"]
+              else:
+                sum_exp += movement["amount"]
+      balance = sum_inc - sum_exp
+      print(f"Total of income: {sum_inc} / Total Expenses: {sum_exp}")
+      print(f"In your history, your balance was/is of: {balance}\n")
     
     elif option == "2":
-      sum_inc = 0
-      sum_exp = 0
+
       year_selection = int(input("Provide the year, please: "))
       if year_selection not in history:
         print(f"No movements registered in {year_selection}")
+        return
       else:
-        for month in history[year_selection]:   
+        for month in history[year_selection]:
           for movement in history[year_selection][month]:
-            if "Expense" not in history[year_selection][month][movement]:
-             sum_inc += history[year_selection][month][movement]["Income"]
-            else:
-              sum_exp += history[year_selection][month][movement]["Expense"]
+              if movement["type"] == "Income":
+                sum_inc += movement["amount"]
+              else:
+                sum_exp += movement["amount"]
       balance = sum_inc - sum_exp
-      print(f"In {year_selection}, your balance was/is of {balance}\n")
       print(f"Total of income: {sum_inc} / Total Expenses: {sum_exp}")
+      print(f"In {year_selection}, your balance was/is of: {balance}\n")
     
     elif option == "3":
-      print("hola")
+
+      year_selection = int(input("Provide the year, please: "))
+      if year_selection not in history:
+        print(f"No movements registered in {year_selection}")
+        return
+      month_selection = int(input("Provide a month, please: "))
+      if month_selection not in history[year_selection]:
+        print(f"No movements registered in this month")
+        return
+      for movement in [history][year_selection][month_selection]:
+        if movement["type"] == "Income":
+              sum_inc += movement["amount"]
+        else:
+                sum_exp += movement["amount"]
+      balance = sum_inc - sum_exp
+      print(f"Total of income: {sum_inc} / Total Expenses: {sum_exp}")
+      print(f"In {month_selection}/{year_selection}, your balance was/is of: {balance}\n")
     
     else:
       print("Select a valid option")
@@ -167,24 +200,6 @@ def view_statistics():
   print(history)
 
 
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
 
 """
 ========  Menu of the program ========================================
