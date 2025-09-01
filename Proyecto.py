@@ -22,8 +22,8 @@ import msvcrt #Allows me to enter any button to continue
 """
 print("Welcome to Alfonso's Finance Manager\n")
 
-history = {2025: {1: [{'type': 'Income', 'amount': 1000.0, 'description': 'rent'}], 7: [{'type': 'Income', 'amount': 3000.0, 'description': 'salary'}], 3: [{'type': 'Expense', 'amount': 500.0, 'category': 1, 'description': ''}], 4: [{'type': 'Expense', 'amount': 100.0, 'category': 4, 'description': ''}]}, 2026: {5: [{'type': 'Income', 'amount': 5000.0, 'description': 'rent'}], 3: [{'type': 'Expense', 'amount': 3000.0, 'category': 2, 'description': ''}]}}
-
+history = {
+}
 
 """
 ================== Functions  =====================================
