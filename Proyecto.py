@@ -22,8 +22,8 @@ import msvcrt #Allows me to enter any button to continue
 """
 print("Welcome to Alfonso's Finance Manager\n")
 
-history = {
-}
+history = {2025: {1: [{'type': 'Income', 'amount': 1000.0, 'description': 'rent'}], 7: [{'type': 'Income', 'amount': 3000.0, 'description': 'salary'}], 3: [{'type': 'Expense', 'amount': 500.0, 'category': 1, 'description': ''}], 4: [{'type': 'Expense', 'amount': 100.0, 'category': 4, 'description': ''}]}, 2026: {5: [{'type': 'Income', 'amount': 5000.0, 'description': 'rent'}], 3: [{'type': 'Expense', 'amount': 3000.0, 'category': 2, 'description': ''}]}}
+
 
 """
 ================== Functions  =====================================
@@ -31,6 +31,43 @@ history = {
 
 def clear_screen():
   os.system('cls' if os.name == 'nt' else 'clear')
+
+def year_selection():
+   year_selection = int(input("Provide the year, please: "))
+   if year_selection not in history:
+      print(f"No movements registered in {year_selection}")
+      return False
+   else:
+     return year_selection
+  
+def month_selection(year):
+   month_selection = int(input("Provide a month, please: "))
+   if month_selection not in history[year]:
+      print(f"No movements registered in this month")
+      return False
+   else:
+     return month_selection
+
+def exp_category():
+  exp_category = int(input(
+      "Select a category:\n"
+      "1---Housing\n"
+      "2---Groceries\n"
+      "3---Transportation\n"
+      "4---Health\n"
+      "5---Education\n"
+      "6---Entertainment\n"
+      "7---Clothing and accessories\n"
+      "8---Savings/Investment\n"
+      "9---Others\n"
+      ))
+    
+  if 0 >= exp_category or exp_category > 9:
+    print("Select a valid category")
+    return False
+  else:
+    return exp_category
+
 
 
 def register_income():
@@ -72,25 +109,12 @@ def register_income():
   
 def register_expense():
   try:
-    exp_amount = float(input("Register the amount: "))
-
-    exp_category = int(input(
-      "Select a category:\n"
-      "1---Housing\n"
-      "2---Groceries\n"
-      "3---Transportation\n"
-      "4---Health\n"
-      "5---Education\n"
-      "6---Entertainment\n"
-      "7---Clothing and accessories\n"
-      "8---Savings/Investment\n"
-      "9---Others\n"
-      ))
-    
-    if 0 >= exp_category or exp_category > 9:
-      print("Select a valid category")
+    exp_cat = exp_category()
+    if not exp_cat:
       return
     
+    exp_amount = float(input("Register the amount: "))
+
     exp_description = input("Register a description (optional): ")
 
     exp_year = int(input("Register a year: "))
@@ -112,7 +136,7 @@ def register_expense():
     # Once the program validated the inputs and added new years/months
     # if its the case, the movement is created and added to "history"
 
-    movement = {"type": "Expense", "amount": exp_amount, "category": exp_category, "description": exp_description}
+    movement = {"type": "Expense", "amount": exp_amount, "category": exp_cat, "description": exp_description}
 
     history[exp_year][exp_month].append(movement)
 
@@ -126,7 +150,7 @@ def register_expense():
 def show_balance():  #it works now, but maybe i can make a function to reduce lines of code
   sum_inc = 0
   sum_exp = 0
-  
+
   try:
     option = input(
       "Select a option:\n"
@@ -152,42 +176,38 @@ def show_balance():  #it works now, but maybe i can make a function to reduce li
       print(f"Total of income: {sum_inc} / Total Expenses: {sum_exp}")
       print(f"In your history, your balance was/is of: {balance}\n")
     
-    elif option == "2":
 
-      year_selection = int(input("Provide the year, please: "))
-      if year_selection not in history:
-        print(f"No movements registered in {year_selection}")
-        return
-      else:
-        for month in history[year_selection]:
-          for movement in history[year_selection][month]:
-              if movement["type"] == "Income":
-                sum_inc += movement["amount"]
-              else:
-                sum_exp += movement["amount"]
+    elif option == "2":
+      year = year_selection()
+      if not year:
+        return  
+      for month in history[year]:
+        for movement in history[year][month]:
+            if movement["type"] == "Income":
+              sum_inc += movement["amount"]
+            else:
+              sum_exp += movement["amount"]
       balance = sum_inc - sum_exp
+
       print(f"Total of income: {sum_inc} / Total Expenses: {sum_exp}")
-      print(f"In {year_selection}, your balance was/is of: {balance}\n")
+      print(f"In {year}, your balance was/is of: {balance}\n")
+
     
     elif option == "3":
-
-      year_selection = int(input("Provide the year, please: "))
-      if year_selection not in history:
-        print(f"No movements registered in {year_selection}")
-        return
-      month_selection = int(input("Provide a month, please: "))
-      if month_selection not in history[year_selection]:
-        print(f"No movements registered in this month")
-        return
-      for movement in [history][year_selection][month_selection]:
-        if movement["type"] == "Income":
+      year = year_selection()
+      if year:
+        month = month_selection(year)
+        if month:
+          for movement in history[year][month]:
+           if movement["type"] == "Income":
               sum_inc += movement["amount"]
-        else:
+           else:
                 sum_exp += movement["amount"]
-      balance = sum_inc - sum_exp
-      print(f"Total of income: {sum_inc} / Total Expenses: {sum_exp}")
-      print(f"In {month_selection}/{year_selection}, your balance was/is of: {balance}\n")
-    
+          balance = sum_inc - sum_exp
+
+          print(f"Total of income: {sum_inc} / Total Expenses: {sum_exp}")
+          print(f"In {month}/{year}, your balance was/is of: {balance}\n")
+
     else:
       print("Select a valid option")
       return
@@ -196,10 +216,46 @@ def show_balance():  #it works now, but maybe i can make a function to reduce li
     print("Insert valid data")
     return
 
+
 def view_statistics():
   print(history)
 
+def v_expenses_category():
+   try:
+      exp_cat = exp_category()
+      if not exp_cat:
+       return
+      
+    
+      question = input(
+      "Sort by:\n"
+      "1---Year\n"
+      "2---Month\n"
+       )
 
+      if question == "1":
+       print("Hola")
+        
+     
+   
+      elif question == "2":
+       print("Hola")
+      
+       
+        
+      else:
+        print("Select a valid option")
+        return
+    
+   except ValueError:
+     print("Insert valid data")
+
+       
+    
+
+    
+
+  
 
 """
 ========  Menu of the program ========================================
