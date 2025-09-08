@@ -14,36 +14,45 @@ The program allows the user to search, delete and edit any movement.
 
 #librarys
 import os #Allows me to clear screen
-import msvcrt #Allows me to enter any button to continue
+import msvcrt #Allows me to enter any key to continue
 
 
 """
-================== Welcome text and defining dictionarys  =====================================
+================== Welcome text and defining global dictionarys/lists  =====================================
 """
 print("Welcome to Alfonso's Finance Manager\n")
 
-history = {2025: {1: [{'type': 'Income', 'amount': 1000.0, 'description': 'rent'}], 7: [{'type': 'Income', 'amount': 3000.0, 'description': 'salary'}], 3: [{'type': 'Expense', 'amount': 500.0, 'category': 1, 'description': ''}], 4: [{'type': 'Expense', 'amount': 100.0, 'category': 4, 'description': ''}]}, 2026: {5: [{'type': 'Income', 'amount': 5000.0, 'description': 'rent'}], 3: [{'type': 'Expense', 'amount': 3000.0, 'category': 2, 'description': ''}]}}
-
+history = {2025: {1: [{'type': 'Income', 'amount': 1000.0, 'description': 'rent'}, {'type': 'Expense', 'amount': 3000.0, 'category': 1, 'description': 'Window'}], 7: [{'type': 'Income', 'amount': 3000.0, 'description': 'salary'}], 3: [{'type': 'Expense', 'amount': 500.0, 'category': 1, 'description': ''}], 4: [{'type': 'Expense', 'amount': 100.0, 'category': 4, 'description': ''}], 9: [{'type': 'Expense', 'amount': 10000.0, 'category': 1, 'description': 'Sofa'}]}, 2026: {5: [{'type': 'Income', 'amount': 5000.0, 'description': 'rent'}], 3: [{'type': 'Expense', 'amount': 3000.0, 'category': 2, 'description': ''}]}}
+months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "Novemeber", "December"]
+expenses_cat = ["Housing", "Groceries", "Transportation", "Health", "Education", "Entertainment", "Clothing and accesories", "Savings/Investment", "Others"]
 
 """
 ================== Functions  =====================================
 """
 
 def clear_screen():
+  print("\nCick to continue")
+  msvcrt.getch()
   os.system('cls' if os.name == 'nt' else 'clear')
 
 def year_selection():
    year_selection = int(input("Provide the year, please: "))
    if year_selection not in history:
-      print(f"No movements registered in {year_selection}")
+      print(f"No movements registered in {year_selection}\n")
       return False
    else:
      return year_selection
-  
+
+def month_to_str(month):
+  return months[month-1]
+
+def category_to_str(category):
+  return expenses_cat[category-1]
+
 def month_selection(year):
    month_selection = int(input("Provide a month, please: "))
    if month_selection not in history[year]:
-      print(f"No movements registered in this month")
+      print(f"No movements registered in this month\n")
       return False
    else:
      return month_selection
@@ -67,7 +76,6 @@ def exp_category():
     return False
   else:
     return exp_category
-
 
 
 def register_income():
@@ -179,18 +187,17 @@ def show_balance():  #it works now, but maybe i can make a function to reduce li
 
     elif option == "2":
       year = year_selection()
-      if not year:
-        return  
-      for month in history[year]:
-        for movement in history[year][month]:
-            if movement["type"] == "Income":
-              sum_inc += movement["amount"]
-            else:
-              sum_exp += movement["amount"]
-      balance = sum_inc - sum_exp
+      if year: 
+       for month in history[year]:
+          for movement in history[year][month]:
+              if movement["type"] == "Income":
+                sum_inc += movement["amount"]
+              else:
+                sum_exp += movement["amount"]
+       balance = sum_inc - sum_exp
 
-      print(f"Total of income: {sum_inc} / Total Expenses: {sum_exp}")
-      print(f"In {year}, your balance was/is of: {balance}\n")
+       print(f"Total of income: {sum_inc} / Total Expenses: {sum_exp}")
+       print(f"In {year}, your balance was/is of: {balance}\n")
 
     
     elif option == "3":
@@ -198,6 +205,7 @@ def show_balance():  #it works now, but maybe i can make a function to reduce li
       if year:
         month = month_selection(year)
         if month:
+          month_str = month_to_str(month)
           for movement in history[year][month]:
            if movement["type"] == "Income":
               sum_inc += movement["amount"]
@@ -206,7 +214,7 @@ def show_balance():  #it works now, but maybe i can make a function to reduce li
           balance = sum_inc - sum_exp
 
           print(f"Total of income: {sum_inc} / Total Expenses: {sum_exp}")
-          print(f"In {month}/{year}, your balance was/is of: {balance}\n")
+          print(f"In {month_str}/{year}, your balance was/is of: {balance}\n")
 
     else:
       print("Select a valid option")
@@ -222,27 +230,50 @@ def view_statistics():
 
 def v_expenses_category():
    try:
-      exp_cat = exp_category()
+      
+      movements_list = [] #List to put the specific movements before them, this allows me to check if there- 
+      exp_cat = exp_category()    #are not movements in a category
       if not exp_cat:
        return
       
-    
-      question = input(
+      clear_screen()
+      
+      category_str = category_to_str(exp_cat)
+      option = input(
       "Sort by:\n"
       "1---Year\n"
       "2---Month\n"
        )
 
-      if question == "1":
-       print("Hola")
-        
-     
-   
-      elif question == "2":
-       print("Hola")
-      
-       
-        
+      if option == "1":
+        year = year_selection()
+        if year:
+          for month in history[year]:
+            for movement in history[year][month]:
+              if movement["type"] == "Expense" and movement["category"] == exp_cat:
+                movements_list.append((movement["amount"], movement["description"]))
+          if not movements_list:
+            print(f"No {category_str} expenses registered in {year}\n")
+          else:
+            print(f"{category_str} expenses in {year}:\n")
+            for pair in movements_list:
+              print(f"Amount: {pair[0]} Description: {pair[1]}")
+    
+      elif option == "2":
+       year = year_selection()
+       if year:
+         month = month_selection(year)
+         if month:
+           month_str = month_to_str(month)
+           for movement in history[year][month]:
+             if movement["type"] == "Expense" and movement["category"] == exp_cat:
+               movements_list.append(movement)
+         if not movements_list:
+           print(f"No {category_str} expenses registered in {month_str}/{year}\n")
+         else:
+           print(f"{category_str} expenses in {month_str}/{year}:\n"
+                 f"{movements_list}")
+           
       else:
         print("Select a valid option")
         return
@@ -262,8 +293,6 @@ def v_expenses_category():
 """
 
 while True:
-  print("Click to continue")
-  msvcrt.getch()
   clear_screen()
   option = input(
     "Select an option:\n"
