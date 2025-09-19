@@ -10,19 +10,52 @@ such as:
 It also allow the user to view the expenses by category (which are specified
 when the user register its expenses)
 The program allows the user to search, delete and edit any movement.
+The program asks to load a previous history to continue editing. It also
+saves the changes automatically
+
 """
 
 #librarys
 import os #Allows me to clear screen
 import msvcrt #Allows me to enter any key to continue
+import json #Allows me to save data in a json file
 
 
 """
-================== Welcome text and defining global dictionarys/lists  =====================================
+================== Initial functions =====================================
 """
-print("Welcome to Alfonso's Finance Manager\n")
 
-history = {}
+def load_data():
+  print("Welcome to Alfonso's Finance Manager\n")
+  load_data = input(
+    "Do you want to load previous data? y/n ").lower().strip()
+  if load_data == "y":
+    try:
+      with open(r"C:\Users\alfon\OneDrive\Escritorio\Programación\TEC\alf_manager.json", "r") as f: #Temporarily i put the direction of the file of my computer
+        print("Your previous history was loaded succesfully!\n")
+        return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+      print("Couldnt open the file, try again\n")
+      return False
+  else:
+    print("All right, new history created\n")
+    return {}
+
+def clear_screen():
+  print("Cick to continue")
+  msvcrt.getch()
+  os.system('cls' if os.name == 'nt' else 'clear')
+
+
+"""
+================== Welcome text, loading data option and defining global dictionarys/lists  =====================================
+"""
+
+history = load_data()
+while history == False:
+  clear_screen()
+  history = load_data()
+
 months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "Novemeber", "December"]
 expenses_cat = ["Housing", "Groceries", "Transportation", "Health", "Education", "Entertainment", "Clothing and accesories", "Savings/Investment", "Others"]
 
@@ -30,11 +63,10 @@ expenses_cat = ["Housing", "Groceries", "Transportation", "Health", "Education",
 ================== Functions  =====================================
 """
 
-def clear_screen():
-  print("Cick to continue")
-  msvcrt.getch()
-  os.system('cls' if os.name == 'nt' else 'clear')
-
+def save_data():
+  with open(r"C:\Users\alfon\OneDrive\Escritorio\Programación\TEC\alf_manager.json", "w") as f:
+    json.dump(history, f, indent = 4) #indent = 4 ayuda a que se guarde legible el diccionario en el json
+            
 def sort_selection():
   option = input(
     "Sort by:\n" 
@@ -118,6 +150,7 @@ def register_income():
     history[inc_year][inc_month].append(movement)
 
     print("\nYour movement has been added succesfully\n")
+    save_data()
 
   except ValueError:
     print("Insert valid data")
@@ -158,6 +191,7 @@ def register_expense():
     history[exp_year][exp_month].append(movement)
 
     print("\nYour movement has been added succesfully\n")
+    save_data()
 
   except ValueError:
     print("Insert valid data")
@@ -260,15 +294,20 @@ def view_statistics():
           print("No expenses registered in your history")
         else:
           sum_exp = sum(expenses_values)
-          max_exp = expenses_list[expenses_values.index(max(expenses_values))]
-          min_exp = expenses_list[expenses_values.index(min(expenses_values))]
+        
+          print("Statistics based on your history:\n")
+          if len(expenses_values) == 1:
+            print(f"Not enough expenses to calculate max/min")
+          else:
+            max_exp = expenses_list[expenses_values.index(max(expenses_values))]
+            min_exp = expenses_list[expenses_values.index(min(expenses_values))]
 
-          print("Statistics based on your history:\n"
-                "Maximun expense:\n"
-                f"{max_exp[0]}/{max_exp[1]} | Amount: {max_exp[2]} | Category: {max_exp[3]} | Description: {max_exp[4]}\n"
-                "Minimun expense:\n"
-                f"{min_exp[0]}/{min_exp[1]} | Amount: {min_exp[2]} | Category: {min_exp[3]} | Description: {min_exp[4]}\n"
-                f"Percentage of income spent: {((sum_exp)/sum_inc)*100}%\n"
+            print("Maximun expense:\n"
+            f"{max_exp[0]}/{max_exp[1]} | Amount: {max_exp[2]} | Category: {max_exp[3]} | Description: {max_exp[4]}\n"
+            "Minimun expense:\n"
+            f"{min_exp[0]}/{min_exp[1]} | Amount: {min_exp[2]} | Category: {min_exp[3]} | Description: {min_exp[4]}\n")
+          
+            print(f"Percentage of income spent: {((sum_exp)/sum_inc)*100}%\n"
                 f"Your average expenses are of: ${(sum_exp)/(len(expenses_values))}\n"
                 )
           
@@ -288,15 +327,19 @@ def view_statistics():
             print(f"No expenses registered in {year}")
           else:
             sum_exp = sum(expenses_values)
-            max_exp = expenses_list[expenses_values.index(max(expenses_values))]
-            min_exp = expenses_list[expenses_values.index(min(expenses_values))]
 
-            print(f"Statistics based on {year}:\n"
-                "Maximun expense:\n"
+            print(f"Statistics based on {year}:\n")
+            if len(expenses_values) == 1:
+                print(f"Not enough expenses to calculate max/min")
+            else: 
+                max_exp = expenses_list[expenses_values.index(max(expenses_values))]
+                min_exp = expenses_list[expenses_values.index(min(expenses_values))]
+                print("Maximun expense:\n"
                 f"{max_exp[0]} | Amount: {max_exp[1]} | Category: {max_exp[2]} | Description: {max_exp[3]}\n"
                 "Minimun expense:\n"
-                f"{min_exp[0]} | Amount: {min_exp[1]} | Category: {min_exp[2]} | Description: {min_exp[3]}\n"
-                f"Percentage of income spent: {((sum_exp)/sum_inc)*100}%\n"
+                f"{min_exp[0]} | Amount: {min_exp[1]} | Category: {min_exp[2]} | Description: {min_exp[3]}\n")
+
+            print(f"Percentage of income spent: {((sum_exp)/sum_inc)*100}%\n"
                 f"Your average expenses are of: ${(sum_exp)/(len(expenses_values))}\n"
                 )
             
@@ -318,18 +361,22 @@ def view_statistics():
             print(f"No expenses registered in {year}/{month_str}")
            else:
              sum_exp = sum(expenses_values)
-             max_exp = expenses_list[expenses_values.index(max(expenses_values))]
-             min_exp = expenses_list[expenses_values.index(min(expenses_values))]
+            
+             print(f"Statistics based on {month_str}/{year}:\n")
+             if len(expenses_values) == 1:
+                print(f"Not enough expenses to calculate max/min")
+             else:
+                max_exp = expenses_list[expenses_values.index(max(expenses_values))]
+                min_exp = expenses_list[expenses_values.index(min(expenses_values))]
 
-             print(f"Statistics based on {month_str}/{year}:\n"
-                "Maximun expense:\n"
+                print("Maximun expense:\n"
                 f"Amount: {max_exp[0]} | Category: {max_exp[1]} | Description: {max_exp[2]}\n"
                 "Minimun expense:\n"
-                f"Amount: {min_exp[0]} | Category: {min_exp[1]} | Description: {min_exp[2]}\n"
-                f"Percentage of income spent: {((sum_exp)/sum_inc)*100}%\n"
-                f"Your average expenses are of: ${(sum_exp)/(len(expenses_values))}\n"
-                )
-       
+                f"Amount: {min_exp[0]} | Category: {min_exp[1]} | Description: {min_exp[2]}\n")
+
+             print(f"Percentage of income spent: {((sum_exp)/sum_inc)*100}%\n"
+                f"Your average expenses are of: ${(sum_exp)/(len(expenses_values))}\n")
+                
     else:
       print("Select a valid option")
 
@@ -510,15 +557,16 @@ def v_e_d_movements():
   except ValueError:
     print("Select valid data")
 
-def load_data():
-  print(history)
+  
 
 """
 ========  Menu of the program ========================================
 """
 
+
 while True:
   clear_screen()
+  
   option = input(
     "Select an option:\n"
     "1---Register income\n" 
@@ -526,9 +574,8 @@ while True:
     "3---Show balance of account\n"
     "4---View statistics\n" 
     "5---View expenses by category\n" 
-    "6---View/edit/delete movements\n"
-    "7---Load data\n" 
-    "8---Exit\n"
+    "6---View/edit/delete movements\n" 
+    "7---Exit\n"
   )
   
   if option == "1":
@@ -550,9 +597,7 @@ while True:
     v_e_d_movements()
     
   elif option == "7":
-    load_data()
-    
-  elif option == "8":
+    print(history)
     print("Thanks for using Alfonso's Finance Manager!")
     break
     
