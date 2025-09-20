@@ -32,9 +32,14 @@ def load_data():
   if load_data == "y":
     try:
       with open(r"C:\Users\alfon\OneDrive\Escritorio\Programación\TEC\alf_manager.json", "r") as f: #Temporarily i put the direction of the file of my computer
-        print("Your previous history was loaded succesfully!\n")
-        return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
+        if json.JSONDecodeError:
+          print("Your previous history is empty. Continue to register movements!")
+          return {}
+        else:
+         print("Your previous history was loaded succesfully!\n")
+         return json.load(f)
+        
+    except FileNotFoundError:
       print("Couldnt open the file, try again\n")
       return False
   else:
@@ -60,12 +65,12 @@ months = ["January", "February", "March", "April", "May", "June", "July", "Augus
 expenses_cat = ["Housing", "Groceries", "Transportation", "Health", "Education", "Entertainment", "Clothing and accesories", "Savings/Investment", "Others"]
 
 """
-================== Functions  =====================================
+================== Helper functions  =====================================
 """
 
 def save_data():
   with open(r"C:\Users\alfon\OneDrive\Escritorio\Programación\TEC\alf_manager.json", "w") as f:
-    json.dump(history, f, indent = 4) #indent = 4 ayuda a que se guarde legible el diccionario en el json
+    json.dump(history, f, indent = 4) #indent = 4 saves the dictionary in a readable format in the json file
             
 def sort_selection():
   option = input(
@@ -76,30 +81,52 @@ def sort_selection():
   )
   return option
 
-def year_selection():
-   year_selection = int(input("Provide the year, please: "))
-   if year_selection not in history:
-      print(f"\nNo movements registered in {year_selection}\n")
+def year_validation():
+  year = input("Provide the year: ")
+  if 2000 > int(year) or int(year) > 2100:
+      print("\nPlease select a valid year\n")
       return False
-   else:
+  else:
+    return year
+  
+def year_selection():
+   year_selection = year_validation()
+   if not year_selection:
      return year_selection
+   else:
+      if year_selection not in history:
+       print(f"\nNo movements registered in {year_selection}\n")
+       return False
+      else:
+       return year_selection
 
-def month_to_str(month):
-  return months[month-1]
-
-def category_to_str(category):
-  return expenses_cat[category-1]
+def month_validation():
+  month = input("Provide a month (1-12): ")
+  if 0 > int(month) or int(month) > 12:
+    print("\nPlease select a valid month\n")
+    return False
+  else:
+    return month
 
 def month_selection(year):
-   month_selection = int(input("Provide a month, please: "))
-   if month_selection not in history[year]:
-      print(f"\nNo movements registered in this month\n")
-      return False
-   else:
+   month_selection = month_validation() 
+   if not month_selection:
      return month_selection
+   else:
+    if month_selection not in history[year]:
+      print(f"\nNo movements registered in {month_to_str(month_selection)}\n")
+      return False
+    else:
+      return month_selection
+   
+def month_to_str(month):
+  return months[int(month)-1]
+
+def category_to_str(category):
+  return expenses_cat[int(category)-1]
 
 def exp_category():
-  exp_category = int(input(
+  exp_category = input(
       "Select a category:\n"
       "1---Housing\n"
       "2---Groceries\n"
@@ -110,14 +137,17 @@ def exp_category():
       "7---Clothing and accessories\n"
       "8---Savings/Investment\n"
       "9---Others\n"
-      ))
+      )
     
-  if 0 >= exp_category or exp_category > 9:
+  if 0 >= int(exp_category) or int(exp_category)> 9:
     print("\nSelect a valid category\n")
     return False
   else:
     return exp_category
 
+"""
+================== Main functions  =====================================
+"""
 
 def register_income():
   try:
@@ -126,17 +156,15 @@ def register_income():
 
     inc_description = input("Register a description: ")
 
-    inc_year = int(input("Register a year: "))
-    if 2000 > inc_year or inc_year > 2100:
-      print("\nPlease select a valid year\n")
+    inc_year = year_validation()
+    if not inc_year:
       return
     
     if inc_year not in history:
       history[inc_year]= {}
 
-    inc_month = int(input("Register Month (1-12): "))
-    if 0 >= inc_month  or inc_month> 12:
-      print("\nPlease select a valid month\n")
+    inc_month = month_validation()
+    if not inc_month:
       return
     
     if inc_month not in history[inc_year]:
@@ -167,17 +195,15 @@ def register_expense():
 
     exp_description = input("Register a description (optional): ")
 
-    exp_year = int(input("Register a year: "))
-    if 2000 > exp_year or exp_year > 2100:
-      print("Please select a valid year")
+    exp_year = year_validation()
+    if not exp_year:
       return
     
     if exp_year not in history:
       history[exp_year]= {}
 
-    exp_month = int(input("Register Month (1-12): "))
-    if 0 >= exp_month  or exp_month> 12:
-      print("Please select a valid month")
+    exp_month = month_validation()
+    if not exp_month:
       return
     
     if exp_month not in history[exp_year]:
@@ -557,12 +583,10 @@ def v_e_d_movements():
   except ValueError:
     print("Select valid data")
 
-  
 
 """
 ========  Menu of the program ========================================
 """
-
 
 while True:
   clear_screen()
