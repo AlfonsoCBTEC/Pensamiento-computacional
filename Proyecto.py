@@ -9,9 +9,9 @@ such as:
   -Average expenses
 It also allow the user to view the expenses by category (which are specified
 when the user register its expenses)
-The program allows the user to search, delete and edit any movement.
+The program allows the user to search and delete any movement.
 The program asks to load a previous history to continue editing. It also
-saves the changes automatically
+saves the changes automatically in a json file.
 
 """
 
@@ -32,13 +32,13 @@ def load_data():
   if load_data == "y":
     try:
       with open(r"C:\Users\alfon\OneDrive\Escritorio\Programación\TEC\alf_manager.json", "r") as f: #Temporarily i put the direction of the file of my computer
-        if json.JSONDecodeError:
-          print("Your previous history is empty. Continue to register movements!")
-          return {}
-        else:
          print("Your previous history was loaded succesfully!\n")
          return json.load(f)
-        
+      
+    except json.JSONDecodeError:
+      print("Your previous history is empty. Continue to register movements!\n")
+      return {}
+
     except FileNotFoundError:
       print("Couldnt open the file, try again\n")
       return False
@@ -170,9 +170,6 @@ def register_income():
     if inc_month not in history[inc_year]:
       history[inc_year][inc_month] = []
     
-    # Once the program validated the inputs and added new years/months
-    # if its the case, the movement is created and added to "history"
-  
     movement = {"type": "Income", "amount": inc_amount, "description": inc_description}
 
     history[inc_year][inc_month].append(movement)
@@ -208,9 +205,6 @@ def register_expense():
     
     if exp_month not in history[exp_year]:
       history[exp_year][exp_month] = []
-    
-    # Once the program validated the inputs and added new years/months
-    # if its the case, the movement is created and added to "history"
 
     movement = {"type": "Expense", "amount": exp_amount, "category": exp_cat, "description": exp_description}
 
@@ -224,7 +218,7 @@ def register_expense():
     return
 
 
-def show_balance():  #it works now, but maybe i can make a function to reduce lines of code
+def show_balance():  
   sum_inc = 0
   sum_exp = 0
 
@@ -413,8 +407,8 @@ def view_statistics():
 def v_expenses_category():
    try:
       
-      movements_list = [] #List to put the specific movements before showing them, this allows me to check if there- 
-      exp_cat = exp_category()    #are not movements in a category
+      movements_list = [] 
+      exp_cat = exp_category()    
       if not exp_cat:
        return
       
@@ -447,17 +441,18 @@ def v_expenses_category():
        if year:
          month = month_selection(year)
          if month:
-           month_str = month_to_str(month)
            for movement in history[year][month]:
              if movement["type"] == "Expense" and movement["category"] == exp_cat:
                movements_list.append((movement["amount"],movement["description"]))
-         if not movements_list:
-           print(f"\nNo {category_str} expenses registered in {month_str}/{year}\n")
-         else:
-           print(f"{category_str} expenses in {month_str}/{year}:\n")
-           for tup in movements_list:
-             print(f"Amount: {tup[0]} Description: {tup[1]}")
-                
+         
+           month_str = month_to_str(month)
+           if not movements_list:
+            print(f"\nNo {category_str} expenses registered in {month_str}/{year}\n")
+           else:
+            print(f"{category_str} expenses in {month_str}/{year}:\n")
+            for tup in movements_list:
+              print(f"Amount: {tup[0]} Description: {tup[1]}")
+                  
       else:
         print("Select a valid option")
         return
@@ -465,10 +460,10 @@ def v_expenses_category():
    except ValueError:
      print("Insert valid data")
 
-def show_movements():
 
-  expenses_list = []
-  income_list = []
+def show_movements():
+  movements_list = []
+
   try:
     option = sort_selection()
     
@@ -477,25 +472,17 @@ def show_movements():
         for year in history:
           for month in history[year]:
             for movement in history[year][month]:
-              month_str = month_to_str(month)
-              if movement["type"] == "Income":
-                income_list.append((month_str, year, movement["amount"], movement["description"]))
-              else:
-                category_str = category_to_str(movement["category"])
-                expenses_list.append((month_str, year, category_str, movement["amount"], movement["description"]))
-        if not income_list:
-          print("No income registered in your history")
-        else:
-          print("Income registered:\n")
-          for tup in income_list:
-            print(f"{tup[0]}/{tup[1]} | Amount: {tup[2]} | Description: {tup[3]}")
-
-        if not expenses_list:
-          print("\nNo expenses registered in your history")
-        else:
-          print("\nExpenses registered:\n")
-          for tup in expenses_list:
-            print(f"{tup[0]}/{tup[1]} | Type: {tup[2]} | Amount: {tup[3]} | Description: {tup[4]}")
+              movements_list.append((year, month, movement))
+        print("Movements regisered in your history:\n")
+        for i, (year, month, mov) in enumerate(movements_list, start=1):
+          month_str = month_to_str(month)
+          if mov["type"] == "Income":
+            print(f"{i}. {month_str}/{year} | Income: {mov['amount']} | {mov['description']}")
+          else:
+            category_str = category_to_str(mov['category'])
+            print(f"{i}. {month_str}/{year} | Expense {category_str}: {mov['amount']} | {mov['description']}")
+        return movements_list, 1
+    
       else:
         print("No movements registered in your history")
         return
@@ -506,25 +493,18 @@ def show_movements():
         if year:
           for month in history[year]:
             for movement in history[year][month]:
-              month_str = month_to_str(month)
-              if movement["type"] == "Income":
-                income_list.append((month_str, movement["amount"], movement["description"]))
-              else:
-                category_str = category_to_str(movement["category"])
-                expenses_list.append((month_str, category_str, movement["amount"], movement["description"]))
-          if not income_list:
-           print(f"No income registered in {year}")
-          else:
-           print(f"Income registered in {year}:\n")
-          for tup in income_list:
-            print(f"{tup[0]} | Amount: {tup[1]} | Description: {tup[2]}")
+              movements_list.append((month, movement))
+          print(f"Movements registered in {year}:\n")
+          for i, (month, mov) in enumerate(movements_list, start=1):
+           month_str = month_to_str(month)
+           if mov["type"] == "Income":
+            print(f"{i}. {month_str} | Income: {mov['amount']} | {mov['description']}")
+           else:
+            category_str = category_to_str(mov['category'])
+            print(f"{i}. {month_str} | Expense {category_str}: {mov['amount']} | {mov['description']}")
+
+        return movements_list, 2, year
         
-          if not expenses_list:
-           print(f"\nNo expenses registered in {year}")
-          else:
-           print(f"\nExpenses registered in {year}:\n")
-          for tup in expenses_list:
-             print(f"{tup[0]} | Type: {tup[1]} | Amount: {tup[2]} | Description: {tup[3]}")
 
     elif option == "3":
         year = year_selection()
@@ -533,49 +513,77 @@ def show_movements():
           if month:
             month_str = month_to_str(month)
             for movement in history[year][month]:
-               if movement["type"] == "Income":
-                income_list.append((movement["amount"], movement["description"]))
-               else:
-                category_str = category_to_str(movement["category"])
-                expenses_list.append((category_str, movement["amount"], movement["description"]))
+              movements_list.append(movement)
+            month_str = month_to_str(month)
+            print(f"Movements registered in {month_str}/{year}\n")
+            for i, mov in enumerate(movements_list, start=1):
+              if mov["type"] == "Income":
+                 print(f"{i}. Income: {mov['amount']} | {mov['description']}")
+              else:
+                 category_str = category_to_str(mov['category'])
+                 print(f"{i}. Expense {category_str}: {mov['amount']} | {mov['description']}")
 
-            if not income_list:
-             print(f"No income registered in {month_str}/{year}\n")
-            else:
-             print(f"Income registered in {month_str}/{year}:\n")
-            for tup in income_list:
-             print(f"Amount: {tup[0]} | Description: {tup[1]}")
-        
-            if not expenses_list:
-             print(f"\nNo expenses registered in {month_str}/{year}\n")
-            else:
-             print(f"\nExpenses registered in {month_str}/{year}:\n")
-            for tup in expenses_list:
-             print(f"Type: {tup[0]} | Amount: {tup[1]} | Description: {tup[2]}")
-
+        return movements_list, 3, year, month
+    
     else:
       print("Select a valid option")
+      return False
     
   except ValueError:
     print("Insert valid data")
-
-def edit_movement():
-  show_movements()
+    return False
 
 
-def v_e_d_movements():
+def delete_movement():
+    movements = show_movements()
+    
+    try:
+       if movements[0]:
+        if movements[1] == 1:
+          num_mov = int(input("\nNumber of movement to delete: "))
+          if 0 <= num_mov <= len(movements[0]):
+            year, month, mov = movements[0][num_mov-1]
+            history[year][month].remove(mov)
+            print(f"Movement {num_mov} was deleted succesfuly.")
+          else:
+            print("Number of movement is out of range")
+
+        if movements[1] == 2:
+          num_mov = int(input("\nNumber of movement to delete: "))
+          if 0 <= num_mov <= len(movements[0]):
+            month, mov = movements[0][num_mov-1]
+            history[movements[2]][month].remove(mov)
+            print(f"Movement {num_mov} was deleted succesfuly.")
+          else:
+            print("Number of movement is out of range")
+
+        if movements[1] == 3:
+          num_mov = int(input("\nNumber of movement to delete: "))
+          if 0 <= num_mov <= len(movements[0]):
+            mov = movements[0][num_mov-1]
+            history[movements[2]][movements[3]].remove(mov)
+            print(f"Movement {num_mov} was deleted succesfuly.")
+          else:
+            print("Number of movement is out of range")
+        
+        save_data()
+        
+    except ValueError:
+        print("Insert valid data")
+
+
+def v_d_movements():
+
   try:
     option = input(
       "1---View movements\n"
-      "2---Edit movements\n"
-      "3---Delete movements\n"
+      "2---Delete movements\n"
     )
 
     if option == "1":
       show_movements()
+
     elif option == "2":
-      edit_movement()
-    elif option == "3":
       delete_movement()
     else:
       print("Select a valid option")
@@ -598,7 +606,7 @@ while True:
     "3---Show balance of account\n"
     "4---View statistics\n" 
     "5---View expenses by category\n" 
-    "6---View/edit/delete movements\n" 
+    "6---View/delete movements\n" 
     "7---Exit\n"
   )
   
@@ -618,7 +626,7 @@ while True:
     v_expenses_category()
     
   elif option == "6":
-    v_e_d_movements()
+    v_d_movements()
     
   elif option == "7":
     print(history)
@@ -633,4 +641,5 @@ while True:
 """
 ========  Enter to exit ========================================
 """
+
 input("Press enter to exit")
