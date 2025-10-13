@@ -31,7 +31,7 @@ def load_data():
     "Do you want to load previous data? y/n ").lower().strip()
   if load_data == "y":
     try:
-      with open(r"C:\Users\alfon\OneDrive\Escritorio\Programación\TEC\alf_manager.json", "r") as f: #Temporarily i put the direction of the file of my computer
+      with open("alf_manager.json", "r") as f:
          print("Your previous history was loaded succesfully!\n")
          return json.load(f)
       
