@@ -26,12 +26,16 @@ import json #Allows me to save data in a json file
 """
 
 def load_data():
+  """
+  Inicial function to welcome the user and 
+  to open a prevoius history or create a new one
+  """
   print("Welcome to Alfonso's Finance Manager\n")
   load_data = input(
     "Do you want to load previous data? y/n ").lower().strip()
   if load_data == "y":
     try:
-      with open("alf_manager.json", "r") as f:
+      with open(r"C:\Users\alfon\OneDrive\Escritorio\Programación\TEC\alf_manager.json", "r") as f: 
          print("Your previous history was loaded succesfully!\n")
          return json.load(f)
       
@@ -47,6 +51,9 @@ def load_data():
     return {}
 
 def clear_screen():
+  """
+  Inicial function to clear screen
+  """
   print("Cick to continue")
   msvcrt.getch()
   os.system('cls' if os.name == 'nt' else 'clear')
@@ -55,12 +62,14 @@ def clear_screen():
 """
 ================== Welcome text, loading data option and defining global dictionarys/lists  =====================================
 """
-
+#Show the welcome text when starting the program
+#Crating the global dictionary history to save movements
 history = load_data()
 while history == False:
   clear_screen()
   history = load_data()
 
+#Global lists
 months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "Novemeber", "December"]
 expenses_cat = ["Housing", "Groceries", "Transportation", "Health", "Education", "Entertainment", "Clothing and accesories", "Savings/Investment", "Others"]
 
@@ -69,10 +78,18 @@ expenses_cat = ["Housing", "Groceries", "Transportation", "Health", "Education",
 """
 
 def save_data():
+  """
+  Saves the changes in the main dictionary "History"
+  in the json file
+  """
   with open(r"C:\Users\alfon\OneDrive\Escritorio\Programación\TEC\alf_manager.json", "w") as f:
     json.dump(history, f, indent = 4) #indent = 4 saves the dictionary in a readable format in the json file
             
 def sort_selection():
+  """
+  Recieves from the user an option to sort the data.
+  Returns the option as a str.
+  """
   option = input(
     "Sort by:\n" 
     "1---History\n" 
@@ -82,6 +99,10 @@ def sort_selection():
   return option
 
 def year_validation():
+  """
+  Validates that the year that the user is providing is valid.
+  Returns false if its not valid, or the year if it is.
+  """
   year = input("Provide the year: ")
   if 2000 > int(year) or int(year) > 2100:
       print("\nPlease select a valid year\n")
@@ -90,6 +111,10 @@ def year_validation():
     return year
   
 def year_selection():
+   """
+   Validates if there is any movement registered 
+   in the year provided by the user.
+   """
    year_selection = year_validation()
    if not year_selection:
      return year_selection
@@ -101,6 +126,10 @@ def year_selection():
        return year_selection
 
 def month_validation():
+  """
+  Validates that the month that the user is providing is valid.
+  Returns false if its not valid, or the year if it is.
+  """
   month = input("Provide a month (1-12): ")
   if 0 > int(month) or int(month) > 12:
     print("\nPlease select a valid month\n")
@@ -109,6 +138,10 @@ def month_validation():
     return month
 
 def month_selection(year):
+   """
+   Validates if there is any movement registered 
+   in the month provided by the user.
+   """
    month_selection = month_validation() 
    if not month_selection:
      return month_selection
@@ -120,13 +153,26 @@ def month_selection(year):
       return month_selection
    
 def month_to_str(month):
-  return months[int(month)-1]
+   """
+   Recieves the number of month that the user provided
+   and returns a string with the name of the month
+   """
+   return months[int(month)-1]
 
 def category_to_str(category):
-  return expenses_cat[int(category)-1]
+   """
+   Recieves the number of the expense category that the user provided
+   and returns a string with the name of the category
+   """
+   return expenses_cat[int(category)-1]
 
 def exp_category():
-  exp_category = input(
+   """
+   Asks the user to select a category of expense
+   and validate if it is valid. If it is not, returns false,
+   If it is returns the category selected in str.
+   """
+   exp_category = input(
       "Select a category:\n"
       "1---Housing\n"
       "2---Groceries\n"
@@ -139,10 +185,10 @@ def exp_category():
       "9---Others\n"
       )
     
-  if 0 >= int(exp_category) or int(exp_category)> 9:
+   if 0 >= int(exp_category) or int(exp_category)> 9:
     print("\nSelect a valid category\n")
     return False
-  else:
+   else:
     return exp_category
 
 """
@@ -150,6 +196,12 @@ def exp_category():
 """
 
 def register_income():
+  """
+  It registers an income. Gathers the amount, description,
+  year and month from the user. Validates the data with 
+  helper functions. Adds the movement to the global dictionary
+  "history". Saves the data in the json file.
+  """
   try:
 
     inc_amount = float(input("Register the amount: "))
@@ -183,6 +235,12 @@ def register_income():
   
   
 def register_expense():
+  """
+  It registers an expense. Gathers the amount, description,category,
+  year and month from the user. Validates the data with 
+  helper functions. Adds the movement to the global dictionary
+  "history". Saves the data in the json file.
+  """
   try:
     exp_cat = exp_category()
     if not exp_cat:
@@ -218,7 +276,10 @@ def register_expense():
     return
 
 
-def show_balance():  
+def show_balance():
+  """
+  Shows the user their current balance of account
+  """  
   sum_inc = 0
   sum_exp = 0
 
@@ -289,6 +350,11 @@ def show_balance():
 
 
 def view_statistics():
+  """
+  Shows the user certain statistics such as maximun expenses, minumun,
+  percentaje of income spent and average expenses.
+
+  """
   try:
 
     expenses_list = []
@@ -405,6 +471,9 @@ def view_statistics():
     return
 
 def v_expenses_category():
+   """
+  Allows the user to view their expenses by a certain category.
+  """
    try:
       
       movements_list = [] 
@@ -462,6 +531,10 @@ def v_expenses_category():
 
 
 def show_movements():
+  """
+  Shows all the movements depending by the sorting option 
+  to the user.
+  """
   movements_list = []
 
   try:
@@ -535,6 +608,9 @@ def show_movements():
 
 
 def delete_movement():
+    """
+  Allows the user to delete any movements.
+  """
     movements = show_movements()
     
     try:
@@ -573,6 +649,10 @@ def delete_movement():
 
 
 def v_d_movements():
+  """
+  Allows the user to select to 
+  wiew or deelete movements.
+  """
 
   try:
     option = input(
@@ -596,6 +676,8 @@ def v_d_movements():
 ========  Menu of the program ========================================
 """
 
+#Iniciates an infinite cicle to show the menu.
+#Stops when the user exits with option 7
 while True:
   clear_screen()
   
@@ -629,7 +711,6 @@ while True:
     v_d_movements()
     
   elif option == "7":
-    print(history)
     print("Thanks for using Alfonso's Finance Manager!")
     break
     
